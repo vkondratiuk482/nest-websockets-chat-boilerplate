@@ -1,11 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 
 import * as bcrypt from 'bcryptjs';
 
-import { UserService } from './../user/user.service';
+import { UserService } from 'src/user/user.service';
 
 import { User } from 'src/user/entities/user.entity';
-import { LoginUserDto } from './../user/dto/login-user.dto';
+import { LoginUserDto } from 'src/user/dto/login-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +23,12 @@ export class AuthService {
 
   async validateUser(userDto: LoginUserDto): Promise<User> {
     const user = await this.userService.findOneByUsername(userDto.username);
+
+    if (!user) {
+      throw new NotFoundException({
+        message: 'User under this login does not exist',
+      });
+    }
 
     const passwordEquals = await bcrypt.compare(
       user.password,
