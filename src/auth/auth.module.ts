@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
@@ -12,7 +11,6 @@ import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
     UserModule,
     PassportModule,
     JwtModule.register({
