@@ -16,7 +16,4 @@ export class User {
 
   @Column()
   is_admin: boolean;
-
-  @Column({ nullable: true })
-  refreshToken: string;
 }
