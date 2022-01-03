@@ -6,11 +6,14 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
+
+import { LocalAuthGuard } from './guards/local-auth.guard';
 
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { LoginUserDto } from 'src/user/dto/login-user.dto';
@@ -42,6 +45,7 @@ export class AuthController {
   }
 
   @Post('/signIn')
+  @UseGuards(LocalAuthGuard)
   async singIn(
     @Body() userDto: LoginUserDto,
     @Res({ passthrough: true }) res: Response,
@@ -63,9 +67,13 @@ export class AuthController {
   ) {
     const { refreshToken } = req.cookies;
 
-    const tokens = this.authService.updateTokens(refreshToken);
+    const tokens = await this.authService.updateTokens(refreshToken);
 
-    res.cookie('refreshToken', refreshToken, {
+    if (!tokens) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });

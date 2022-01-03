@@ -17,7 +17,7 @@ import { ConfigModule } from '@nestjs/config';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
     }),
     ChatModule,
     UserModule,

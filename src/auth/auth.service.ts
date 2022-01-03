@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import * as bcrypt from 'bcryptjs';
@@ -45,9 +49,13 @@ export class AuthService {
   async validateUser(userDto: LoginUserDto): Promise<User> {
     const user = await this.userService.findOneByUsername(userDto.username);
 
+    if (!user) {
+      throw new NotFoundException(`There is no user under this username`);
+    }
+
     const passwordEquals = await bcrypt.compare(
-      user.password,
       userDto.password,
+      user.password,
     );
 
     if (passwordEquals) return user;
@@ -56,13 +64,17 @@ export class AuthService {
   }
 
   async updateTokens(refreshToken: string) {
-    const userId = this.jwtService.verify(refreshToken, {
-      secret: process.env.JWT_REFRESH_SECRET,
-    });
+    try {
+      const userId = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
 
-    const tokens = this.generateTokens(userId);
+      const tokens = this.generateTokens(userId);
 
-    return tokens;
+      return tokens;
+    } catch (e) {
+      return null;
+    }
   }
 
   private async generateTokens(id: string) {

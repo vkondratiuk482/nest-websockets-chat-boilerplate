@@ -33,10 +33,6 @@ export class UserService {
   async findOneByUsername(username: string) {
     const user = await this.userRepository.findOne({ username });
 
-    if (!user) {
-      throw new NotFoundException(`There is no user under this username`);
-    }
-
     return user;
   }
 
