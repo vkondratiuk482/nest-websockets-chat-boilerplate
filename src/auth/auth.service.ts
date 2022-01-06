@@ -63,6 +63,26 @@ export class AuthService {
     throw new UnauthorizedException({ message: 'Incorrect password' });
   }
 
+  verifyAccessToken(accessToken: string) {
+    try {
+      const payload = this.jwtService.verify(accessToken, {
+        secret: process.env.JWT_ACCESS_SECRET,
+      });
+
+      return payload;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  verifyRefreshToken(refreshToken: string) {
+    const payload = this.jwtService.verify(refreshToken, {
+      secret: process.env.JWT_REFRESH_SECRET,
+    });
+
+    return payload;
+  }
+
   async updateTokens(refreshToken: string) {
     try {
       const userId = this.jwtService.verify(refreshToken, {

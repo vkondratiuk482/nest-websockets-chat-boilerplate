@@ -21,13 +21,15 @@ export class UserService {
   }
 
   async findOne(id: string) {
-    const user = await this.userRepository.findOne(id);
+    try {
+      const user = await this.userRepository.findOne(id);
 
-    if (!user) {
-      throw new NotFoundException(`There is no user under id ${id}`);
-    }
+      if (!user) {
+        throw new NotFoundException(`There is no user under id ${id}`);
+      }
 
-    return user;
+      return user;
+    } catch (e) {}
   }
 
   async findOneByUsername(username: string) {
