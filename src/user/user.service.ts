@@ -29,7 +29,9 @@ export class UserService {
       }
 
       return user;
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async findOneByUsername(username: string) {

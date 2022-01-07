@@ -26,15 +26,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const token = client.handshake.query.token.toString();
     const payload = this.authService.verifyAccessToken(token);
 
-    if (!payload) {
+    const user = payload && (await this.userService.findOne(payload.id));
+
+    if (!user) {
       client.disconnect(true);
 
       return;
     }
 
-    const user = await this.userService.findOne(payload.id);
-
-    this.connectedUsers.set(client.id, payload.id);
+    this.connectedUsers.set(client.id, user.id);
   }
 
   async handleDisconnect(client: Socket) {
