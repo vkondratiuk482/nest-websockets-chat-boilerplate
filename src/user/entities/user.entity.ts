@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinTable,
+} from 'typeorm';
+
+import { Room } from 'src/room/entities/room.entity';
 
 @Entity()
 export class User {
@@ -16,4 +24,8 @@ export class User {
 
   @Column()
   is_admin: boolean;
+
+  @JoinTable()
+  @ManyToOne(() => Room, (room: Room) => room.users)
+  room: Room;
 }
