@@ -4,9 +4,11 @@ import {
   Column,
   ManyToOne,
   JoinTable,
+  OneToMany,
 } from 'typeorm';
 
 import { Room } from 'src/room/entities/room.entity';
+import { Message } from 'src/room/entities/message.entity';
 
 @Entity()
 export class User {
@@ -28,4 +30,7 @@ export class User {
   @JoinTable()
   @ManyToOne(() => Room, (room: Room) => room.users)
   room: Room;
+
+  @OneToMany(() => Message, (message: Message) => message.user)
+  messages: Array<Message>;
 }
