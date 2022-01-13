@@ -4,8 +4,9 @@ export class AddMessageDto {
   @IsString()
   text: string;
 
+  @IsOptional()
   @IsUUID()
-  roomId: string;
+  roomId?: string;
 
   @IsOptional()
   @IsUUID()

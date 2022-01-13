@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 
 import { User } from './entities/user.entity';
+import { Room } from 'src/room/entities/room.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -22,7 +23,9 @@ export class UserService {
 
   async findOne(id: string) {
     try {
-      const user = await this.userRepository.findOne(id);
+      const user = await this.userRepository.findOne(id, {
+        relations: ['room'],
+      });
 
       if (!user) {
         throw new NotFoundException(`There is no user under id ${id}`);
@@ -53,6 +56,19 @@ export class UserService {
     const user = await this.userRepository.preload({
       id,
       ...updateUserDto,
+    });
+
+    if (!user) {
+      throw new NotFoundException(`There is no user under id ${id}`);
+    }
+
+    return this.userRepository.save(user);
+  }
+
+  async updateUserRoom(id: string, room: Room) {
+    const user = await this.userRepository.preload({
+      id,
+      room,
     });
 
     if (!user) {

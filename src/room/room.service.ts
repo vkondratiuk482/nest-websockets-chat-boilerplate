@@ -4,6 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 
+import { UserService } from 'src/user/user.service';
+
 import { Room } from './entities/room.entity';
 import { Message } from './entities/message.entity';
 
@@ -17,31 +19,20 @@ export class RoomService {
     @InjectRepository(Room) private readonly roomRepository: Repository<Room>,
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    private readonly userService: UserService,
   ) {}
 
   async findAll() {
-    const rooms = await this.roomRepository.find();
+    const rooms = await this.roomRepository.find({ relations: ['messages'] });
 
     return rooms;
   }
 
-  async findMessagesByRoom(id: string) {
-    const { messages } = await this.findOne(id);
-
-    return messages;
-  }
-
-  async findMessagesWithLimit(id: string, limit: number) {
-    const messages = await this.findMessagesByRoom(id);
-
-    const limitedMessages = messages.slice(limit * -1);
-
-    return limitedMessages;
-  }
-
   async findOne(id: string) {
     try {
-      const room = await this.roomRepository.findOne(id);
+      const room = await this.roomRepository.findOne(id, {
+        relations: ['messages'],
+      });
 
       if (!room) {
         throw new NotFoundException(`There is no room under id ${id}`);
@@ -71,9 +62,16 @@ export class RoomService {
   async addMessage(addMessageDto: AddMessageDto) {
     const id = uuidv4();
 
+    const { roomId, userId, text } = addMessageDto;
+
+    const room = await this.findOne(roomId);
+    const user = await this.userService.findOne(userId);
+
     const message = await this.messageRepository.create({
       id,
-      ...addMessageDto,
+      text,
+      room,
+      user,
     });
 
     return this.messageRepository.save(message);
