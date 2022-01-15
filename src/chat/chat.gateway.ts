@@ -1,4 +1,3 @@
-import { UseGuards } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -8,8 +7,6 @@ import {
 } from '@nestjs/websockets';
 
 import { Socket } from 'socket.io';
-
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 import { UserService } from 'src/user/user.service';
 import { AuthService } from 'src/auth/auth.service';
@@ -56,7 +53,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.connectedUsers.delete(client.id);
   }
 
-  //add jwt guard for webosockets
   @SubscribeMessage('message')
   async onMessage(client: Socket, addMessageDto: AddMessageDto) {
     const userId = this.connectedUsers.get(client.id);
