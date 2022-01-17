@@ -10,8 +10,8 @@ import { Room } from './entities/room.entity';
 import { Message } from './entities/message.entity';
 
 import { AddMessageDto } from 'src/chat/dto/add-message.dto';
-import { CreateRoomDto } from './dto/create-room.dto';
-import { UpdateRoomDto } from './dto/update-room.dto';
+import { CreateRoomDto } from 'src/room/dto/create-room.dto';
+import { UpdateRoomDto } from 'src/room/dto/update-room.dto';
 
 @Injectable()
 export class RoomService {
@@ -31,7 +31,7 @@ export class RoomService {
   async findOne(id: string) {
     try {
       const room = await this.roomRepository.findOne(id, {
-        relations: ['messages'],
+        relations: ['messages', 'users'],
       });
 
       if (!room) {

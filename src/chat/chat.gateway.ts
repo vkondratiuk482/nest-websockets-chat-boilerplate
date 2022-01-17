@@ -1,3 +1,4 @@
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -15,7 +16,9 @@ import { RoomService } from 'src/room/room.service';
 import { AddMessageDto } from './dto/add-message.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { LeaveRoomDto } from './dto/leave-room.dto';
+import { KickUserDto } from './dto/kick-user.dto';
 
+@UsePipes(new ValidationPipe())
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -45,7 +48,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.connectedUsers.set(client.id, user.id);
 
     if (room) {
-      client.join(room.id);
+      return this.onRoomJoin(client, { roomId: room.id });
     }
   }
 
@@ -97,5 +100,29 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     await this.userService.updateUserRoom(userId, null);
 
     client.leave(leaveRoomDto.roomId);
+  }
+
+  @SubscribeMessage('user-kick')
+  async onUserKick(client: Socket, kickUserDto: KickUserDto) {
+    const { roomId, reason } = kickUserDto;
+
+    const userId = this.connectedUsers.get(client.id);
+    const room = await this.roomService.findOne(roomId);
+
+    if (userId !== room.ownerId) {
+      return;
+    }
+
+    for (const [key, value] of this.connectedUsers.entries()) {
+      if (value === kickUserDto.userId) {
+        const kickedClient = this.server.sockets.sockets.get(key);
+
+        client.to(key).emit('kicked', reason);
+
+        return this.onRoomLeave(kickedClient, { roomId });
+      }
+    }
+
+    return;
   }
 }
