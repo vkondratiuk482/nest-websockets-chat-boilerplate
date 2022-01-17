@@ -12,6 +12,7 @@ import { Message } from './entities/message.entity';
 import { AddMessageDto } from 'src/chat/dto/add-message.dto';
 import { CreateRoomDto } from 'src/room/dto/create-room.dto';
 import { UpdateRoomDto } from 'src/room/dto/update-room.dto';
+import { BanUserDto } from 'src/chat/dto/ban-user.dto';
 
 @Injectable()
 export class RoomService {
@@ -31,7 +32,7 @@ export class RoomService {
   async findOne(id: string) {
     try {
       const room = await this.roomRepository.findOne(id, {
-        relations: ['messages', 'users'],
+        relations: ['messages', 'users', 'bannedUsers'],
       });
 
       if (!room) {
@@ -88,6 +89,24 @@ export class RoomService {
     }
 
     return this.roomRepository.save(room);
+  }
+
+  async banUserFromRoom(banUserDto: BanUserDto) {
+    const { userId, roomId } = banUserDto;
+
+    const user = await this.userService.findOne(userId);
+    const room = await this.findOne(roomId);
+    delete user.room;
+
+    await this.userService.updateUserRoom(userId, null);
+
+    const bannedUsers = { ...room.bannedUsers, ...user };
+    const updatedRoom = await this.roomRepository.preload({
+      id: roomId,
+      bannedUsers,
+    });
+
+    return this.roomRepository.save(updatedRoom);
   }
 
   async remove(id: string) {

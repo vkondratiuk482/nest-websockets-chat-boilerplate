@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { v4 as uuidv4 } from 'uuid';
@@ -73,6 +77,14 @@ export class UserService {
 
     if (!user) {
       throw new NotFoundException(`There is no user under id ${id}`);
+    }
+
+    const isBanned = user.bannedRooms?.find(
+      (bannedRoom) => bannedRoom.id === room?.id,
+    );
+
+    if (isBanned) {
+      throw new ForbiddenException(`You have been banned from this room`);
     }
 
     return this.userRepository.save(user);

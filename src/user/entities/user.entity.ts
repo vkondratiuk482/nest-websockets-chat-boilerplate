@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinTable,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 
 import { Room } from 'src/room/entities/room.entity';
@@ -30,6 +31,10 @@ export class User {
   @JoinTable()
   @ManyToOne(() => Room, (room: Room) => room.users)
   room: Room;
+
+  @JoinTable()
+  @ManyToMany(() => Room, (room: Room) => room.bannedUsers, { eager: true })
+  bannedRooms: Array<Room>;
 
   @OneToMany(() => Message, (message: Message) => message.user)
   messages: Array<Message>;

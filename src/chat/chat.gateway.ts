@@ -17,6 +17,7 @@ import { AddMessageDto } from './dto/add-message.dto';
 import { JoinRoomDto } from './dto/join-room.dto';
 import { LeaveRoomDto } from './dto/leave-room.dto';
 import { KickUserDto } from './dto/kick-user.dto';
+import { BanUserDto } from './dto/ban-user.dto';
 
 @UsePipes(new ValidationPipe())
 @WebSocketGateway()
@@ -75,31 +76,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('join')
   async onRoomJoin(client: Socket, joinRoomDto: JoinRoomDto) {
+    const { roomId } = joinRoomDto;
     const limit = 10;
 
-    const room = await this.roomService.findOne(joinRoomDto.roomId);
+    const room = await this.roomService.findOne(roomId);
 
-    if (!room) {
-      return;
-    }
+    if (!room) return;
 
     const userId = this.connectedUsers.get(client.id);
     const messages = room.messages.slice(limit * -1);
 
     await this.userService.updateUserRoom(userId, room);
 
-    client.join(joinRoomDto.roomId);
+    client.join(roomId);
 
     client.emit('message', messages);
   }
 
   @SubscribeMessage('leave')
   async onRoomLeave(client: Socket, leaveRoomDto: LeaveRoomDto) {
+    const { roomId } = leaveRoomDto;
     const userId = this.connectedUsers.get(client.id);
 
     await this.userService.updateUserRoom(userId, null);
 
-    client.leave(leaveRoomDto.roomId);
+    client.leave(roomId);
   }
 
   @SubscribeMessage('user-kick')
@@ -109,20 +110,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = this.connectedUsers.get(client.id);
     const room = await this.roomService.findOne(roomId);
 
-    if (userId !== room.ownerId) {
-      return;
-    }
+    if (userId !== room.ownerId) return;
 
+    await this.userService.updateUserRoom(kickUserDto.userId, null);
+
+    const kickedClient = this.getClientByUserId(kickUserDto.userId);
+
+    if (!kickedClient) return;
+
+    client.to(kickedClient.id).emit('kicked', reason);
+    kickedClient.leave(roomId);
+  }
+
+  @SubscribeMessage('user-ban')
+  async onUserBan(client: Socket, banUserDto: BanUserDto) {
+    const { roomId, reason } = banUserDto;
+
+    const userId = this.connectedUsers.get(client.id);
+    const room = await this.roomService.findOne(roomId);
+
+    if (userId !== room.ownerId) return;
+
+    await this.roomService.banUserFromRoom(banUserDto);
+
+    const bannedClient = this.getClientByUserId(banUserDto.userId);
+
+    if (!bannedClient) return;
+
+    client.to(bannedClient.id).emit('banned', reason);
+    bannedClient.leave(roomId);
+  }
+
+  private getClientByUserId(userId: string): Socket | null {
     for (const [key, value] of this.connectedUsers.entries()) {
-      if (value === kickUserDto.userId) {
+      if (value === userId) {
         const kickedClient = this.server.sockets.sockets.get(key);
 
-        client.to(key).emit('kicked', reason);
-
-        return this.onRoomLeave(kickedClient, { roomId });
+        return kickedClient;
       }
     }
 
-    return;
+    return null;
   }
 }
