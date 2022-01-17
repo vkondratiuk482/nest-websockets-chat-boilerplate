@@ -96,7 +96,6 @@ export class RoomService {
 
     const user = await this.userService.findOne(userId);
     const room = await this.findOne(roomId);
-    delete user.room;
 
     await this.userService.updateUserRoom(userId, null);
 
