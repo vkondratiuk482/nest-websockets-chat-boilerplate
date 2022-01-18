@@ -1,4 +1,4 @@
-import { UsePipes, ValidationPipe } from '@nestjs/common';
+import { ForbiddenException, UsePipes, ValidationPipe } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -110,7 +110,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = this.connectedUsers.get(client.id);
     const room = await this.roomService.findOne(roomId);
 
-    if (userId !== room.ownerId) return;
+    if (userId !== room.ownerId) {
+      throw new ForbiddenException(`You are not the owner of the room!`);
+    }
 
     await this.userService.updateUserRoom(kickUserDto.userId, null);
 
@@ -129,7 +131,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const userId = this.connectedUsers.get(client.id);
     const room = await this.roomService.findOne(roomId);
 
-    if (userId !== room.ownerId) return;
+    if (userId !== room.ownerId) {
+      throw new ForbiddenException(`You are not the owner of the room!`);
+    }
 
     await this.roomService.banUserFromRoom(banUserDto);
 
