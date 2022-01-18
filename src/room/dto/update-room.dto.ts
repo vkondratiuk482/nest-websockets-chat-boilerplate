@@ -1,12 +1,15 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateRoomDto {
   @IsString()
-  readonly name: string;
+  @IsOptional()
+  readonly name?: string;
 
   @IsString()
-  readonly description: string;
+  @IsOptional()
+  readonly description?: string;
 
   @IsString()
-  readonly avatar: string;
+  @IsOptional()
+  readonly avatar?: string;
 }
