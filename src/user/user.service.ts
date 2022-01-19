@@ -46,10 +46,7 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const id = uuidv4();
-
     const user = await this.userRepository.create({
-      id,
       ...createUserDto,
     });
 

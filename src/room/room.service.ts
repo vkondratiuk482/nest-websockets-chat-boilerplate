@@ -50,10 +50,7 @@ export class RoomService {
   }
 
   async create(createRoomDto: CreateRoomDto) {
-    const id = uuidv4();
-
     const room = await this.roomRepository.create({
-      id,
       ...createRoomDto,
     });
 
@@ -61,15 +58,12 @@ export class RoomService {
   }
 
   async addMessage(addMessageDto: AddMessageDto) {
-    const id = uuidv4();
-
     const { roomId, userId, text } = addMessageDto;
 
     const room = await this.findOne(roomId);
     const user = await this.userService.findOne(userId);
 
     const message = await this.messageRepository.create({
-      id,
       text,
       room,
       user,
