@@ -61,23 +61,15 @@ export class AuthController {
   }
 
   @Post('/update')
-  async updateTokens(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async updateTokens(@Req() req: Request) {
     const { refreshToken } = req.cookies;
 
-    const tokens = await this.authService.updateTokens(refreshToken);
+    const accessToken = await this.authService.updateAccessToken(refreshToken);
 
-    if (!tokens) {
+    if (!accessToken) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
 
-    res.cookie('refreshToken', tokens.refreshToken, {
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-
-    return tokens;
+    return accessToken;
   }
 }

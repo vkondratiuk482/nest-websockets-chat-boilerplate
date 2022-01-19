@@ -83,15 +83,13 @@ export class AuthService {
     return payload;
   }
 
-  async updateTokens(refreshToken: string) {
+  async updateAccessToken(refreshToken: string) {
     try {
-      const userId = this.jwtService.verify(refreshToken, {
-        secret: process.env.JWT_REFRESH_SECRET,
-      });
+      const userId = this.verifyRefreshToken(refreshToken);
 
-      const tokens = this.generateTokens(userId);
+      const tokens = await this.generateTokens(userId);
 
-      return tokens;
+      return tokens.accessToken;
     } catch (e) {
       return null;
     }
