@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 
 import { User } from './entities/user.entity';
@@ -26,17 +25,15 @@ export class UserService {
   }
 
   async findOne(id: string) {
-    try {
-      const user = await this.userRepository.findOne(id, {
-        relations: ['room'],
-      });
+    const user = await this.userRepository.findOne(id, {
+      relations: ['room'],
+    });
 
-      if (!user) {
-        throw new NotFoundException(`There is no user under id ${id}`);
-      }
+    if (!user) {
+      throw new NotFoundException(`There is no user under id ${id}`);
+    }
 
-      return user;
-    } catch (e) {}
+    return user;
   }
 
   async findOneByUsername(username: string) {

@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { v4 as uuidv4 } from 'uuid';
 import { Repository } from 'typeorm';
 
 import { UserService } from 'src/user/user.service';
@@ -30,17 +29,25 @@ export class RoomService {
   }
 
   async findOne(id: string) {
-    try {
-      const room = await this.roomRepository.findOne(id, {
-        relations: ['messages', 'users', 'bannedUsers'],
-      });
+    const room = await this.roomRepository.findOne(id);
 
-      if (!room) {
-        throw new NotFoundException(`There is no room under id ${id}`);
-      }
+    if (!room) {
+      throw new NotFoundException(`There is no room under id ${id}`);
+    }
 
-      return room;
-    } catch (e) {}
+    return room;
+  }
+
+  async findOneWithRelations(id: string) {
+    const room = await this.roomRepository.findOne(id, {
+      relations: ['messages', 'users', 'bannedUsers'],
+    });
+
+    if (!room) {
+      throw new NotFoundException(`There is no room under id ${id}`);
+    }
+
+    return room;
   }
 
   async findOneByName(name: string) {

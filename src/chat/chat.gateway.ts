@@ -79,7 +79,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { roomId } = joinRoomDto;
     const limit = 10;
 
-    const room = await this.roomService.findOne(roomId);
+    const room = await this.roomService.findOneWithRelations(roomId);
 
     if (!room) return;
 
@@ -108,7 +108,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { roomId, reason } = kickUserDto;
 
     const userId = this.connectedUsers.get(client.id);
-    const room = await this.roomService.findOne(roomId);
+    const room = await this.roomService.findOneWithRelations(roomId);
 
     if (userId !== room.ownerId) {
       throw new ForbiddenException(`You are not the owner of the room!`);
@@ -129,10 +129,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const { roomId, reason } = banUserDto;
 
     const userId = this.connectedUsers.get(client.id);
-    const room = await this.roomService.findOne(roomId);
+    const room = await this.roomService.findOneWithRelations(roomId);
 
     if (userId !== room.ownerId) {
       throw new ForbiddenException(`You are not the owner of the room!`);
+    }
+
+    if (userId === banUserDto.userId) {
+      throw new ForbiddenException(`You can't ban yourself`);
     }
 
     await this.roomService.banUserFromRoom(banUserDto);
