@@ -12,5 +12,5 @@ export class CreateRoomDto {
 
   @IsOptional()
   @IsString()
-  ownerId: string;
+  ownerId?: string;
 }
