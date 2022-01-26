@@ -20,7 +20,7 @@ I decided to get familiar with websockets in [Nest.js](https://github.com/nestjs
 ## Installation
 
 ```bash
-$ npm install
+$ yarn install
 ```
 
 ## Running the app
@@ -30,9 +30,6 @@ $ npm install
 $ docker-compose up
 
 # development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
+$ yarn run start
 ```
 
