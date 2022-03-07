@@ -23,6 +23,19 @@ I decided to get familiar with websockets in [Nest.js](https://github.com/nestjs
 $ yarn install
 ```
 
+## Example of .env file
+```bash
+JWT_ACCESS_SECRET=ACCESS_SECRET
+JWT_REFRESH_SECRET=REFRESH_SECRET
+JWT_ACCESS_EXPIRE=60m
+JWT_REFRESH_EXPIRE=30d
+DB_NAME=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASS=pass123
+```
+
 ## Running the app
 
 ```bash
